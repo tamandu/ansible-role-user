@@ -1,0 +1,5 @@
+{% if item.value.sudo_need_password %}
+{{ item.key }} ALL=(ALL) ALL
+{% else %}
+{{ item.key }} ALL=(ALL) NOPASSWD:ALL
+{% endif %}

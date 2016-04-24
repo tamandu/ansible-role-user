@@ -1,0 +1,27 @@
+---
+- name: user
+  user: >
+    name={{ item.key }}
+    uid={{ item.value.uid | default(omit) }}
+    group={{ item.value.group }}
+    groups={{ item.value.groups | default(omit) }}
+    password={{ item.value.password | password_hash('sha512') }}
+    home={{ item.value.home | default(omit) }}
+    state=present
+    update_password=on_create
+  with_dict: "{{ user | default({}) }}"
+
+- name: ssh key
+  authorized_key: user={{ item.key }} key="{{ lookup('file', item.value.ssh_key) }}"
+  with_dict: "{{ user | default({}) }}"
+  when: item.value.ssh_key is defined
+
+- name: /etc/suoders.d
+  template: >
+    src=sudoers.d.j2
+    dest=/etc/sudoers.d/{{ item.key }}
+    owner=root
+    group=root
+    mode=0600
+  with_dict: "{{ user | default({}) }}"
+  when: item.value.sudo == true
